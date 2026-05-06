@@ -1,0 +1,100 @@
+/* ============================================================
+   animations.css — Reusable keyframes & transition classes
+   ============================================================ */
+
+/* ── 3D TILT ─────────────────────────────────────────────── */
+.tilt-card {
+  transform-style: preserve-3d;
+  transform: perspective(1000px);
+  transition: transform 0.1s ease;
+}
+
+/* ── SKILL BADGE STAGGER (legacy, kept for compatibility) ── */
+.skill-badge:nth-child(1)  { transition-delay: 0.00s; }
+.skill-badge:nth-child(2)  { transition-delay: 0.04s; }
+.skill-badge:nth-child(3)  { transition-delay: 0.08s; }
+.skill-badge:nth-child(4)  { transition-delay: 0.12s; }
+.skill-badge:nth-child(5)  { transition-delay: 0.16s; }
+.skill-badge:nth-child(6)  { transition-delay: 0.20s; }
+.skill-badge:nth-child(7)  { transition-delay: 0.24s; }
+.skill-badge:nth-child(8)  { transition-delay: 0.28s; }
+.skill-badge:nth-child(9)  { transition-delay: 0.32s; }
+.skill-badge:nth-child(10) { transition-delay: 0.36s; }
+.skill-badge:nth-child(11) { transition-delay: 0.40s; }
+.skill-badge:nth-child(12) { transition-delay: 0.44s; }
+
+/* ── NEON FLICKER ────────────────────────────────────────── */
+@keyframes neonFlicker {
+  0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+    text-shadow: 0 0 10px var(--cyan), 0 0 30px var(--cyan), 0 0 60px var(--cyan);
+  }
+  20%, 24%, 55% { text-shadow: none; }
+}
+.neon-flicker { animation: neonFlicker 5s infinite; }
+
+/* ── FLOAT ───────────────────────────────────────────────── */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-10px); }
+}
+.float { animation: float 4s ease-in-out infinite; }
+
+/* ── TYPING CURSOR ───────────────────────────────────────── */
+@keyframes typingCursor {
+  50% { border-color: transparent; }
+}
+.typing-cursor {
+  border-right: 2px solid var(--cyan);
+  animation: typingCursor 0.8s step-end infinite;
+}
+
+/* ── SLIDE INS ──────────────────────────────────────────── */
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-40px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.slide-in-left { animation: slideInLeft 0.6s ease forwards; }
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(40px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.slide-in-right { animation: slideInRight 0.6s ease forwards; }
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to   { opacity: 1; transform: scale(1); }
+}
+.scale-in { animation: scaleIn 0.5s ease forwards; }
+
+/* ── BORDER PULSES ───────────────────────────────────────── */
+@keyframes borderPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(0, 229, 255, 0); }
+  50%      { box-shadow: 0 0 0 2px rgba(0, 229, 255, 0.2),
+                          0 0 20px rgba(0, 229, 255, 0.1); }
+}
+.border-pulse { animation: borderPulse 3s ease-in-out infinite; }
+
+@keyframes redBorderPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 51, 85, 0); }
+  50%      { box-shadow: 0 0 0 2px rgba(255, 51, 85, 0.2),
+                          0 0 20px rgba(255, 51, 85, 0.1); }
+}
+.red-pulse { animation: redBorderPulse 3s ease-in-out infinite; }
+
+/* ── HERO LOGO ENTRANCE (used by GSAP) ──────────────────── */
+@keyframes heroLogoGlitch {
+  0%   { clip-path: inset(20% 0 30% 0); transform: translate(-2px, 0); }
+  20%  { clip-path: inset(60% 0 5% 0);  transform: translate(2px, 0); }
+  40%  { clip-path: inset(10% 0 70% 0); transform: translate(-1px, 0); }
+  60%  { clip-path: inset(40% 0 40% 0); transform: translate(1px, 0); }
+  80%  { clip-path: inset(0 0 0 0);     transform: translate(0); }
+  100% { clip-path: inset(0 0 0 0);     transform: translate(0); }
+}
+
+/* ── DRIFTING TEXT (used by tags entrance) ──────────────── */
+@keyframes driftIn {
+  from { opacity: 0; transform: translateX(40px) skewX(-12deg); filter: blur(6px); }
+  to   { opacity: 1; transform: translateX(0)    skewX(0);     filter: blur(0); }
+}
+.drift-in { animation: driftIn 0.7s ease forwards; }

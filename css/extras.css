@@ -1,0 +1,264 @@
+/* ============================================================
+   extras.css — Extras: photo glitch reveal, holographic touches,
+                  IDENTITY-VERIFIED removed, etc.
+   ============================================================ */
+
+/* ════════════════════════════════════════════════════════════
+   PROFILE PHOTO CARD
+   - Animated corners (preserved)
+   - Animated glow (preserved)
+   - Animated scanline (preserved)
+   - IDENTITY: VERIFIED label  →  REMOVED (was the ::after pseudo)
+   - Glitch decrypt overlay on scroll  →  ADDED
+   ════════════════════════════════════════════════════════════ */
+.journey-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: start;
+}
+.journey-photo {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 20px;
+}
+
+.photo-frame {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  aspect-ratio: 3 / 4;
+  background: var(--bg3);
+  border: 1px solid var(--dim);
+  overflow: hidden;
+}
+
+.ph-c {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  z-index: 5;
+  animation: phCorner 4s ease-in-out infinite;
+}
+.ph-c-tl { top: 10px;    left: 10px;    border-top:    2px solid var(--cyan); border-left:  2px solid var(--cyan); }
+.ph-c-tr { top: 10px;    right: 10px;   border-top:    2px solid var(--cyan); border-right: 2px solid var(--cyan); animation-delay: .5s; }
+.ph-c-bl { bottom: 10px; left: 10px;    border-bottom: 2px solid var(--cyan); border-left:  2px solid var(--cyan); animation-delay: 1s; }
+.ph-c-br { bottom: 10px; right: 10px;   border-bottom: 2px solid var(--cyan); border-right: 2px solid var(--cyan); animation-delay: 1.5s; }
+@keyframes phCorner {
+  0%, 100% { box-shadow: 0 0 0 rgba(0, 229, 255, 0); }
+  50%      { box-shadow: 0 0 12px rgba(0, 229, 255, .6); }
+}
+
+.photo-glow {
+  position: absolute;
+  inset: -2px;
+  border: 1px solid transparent;
+  background: linear-gradient(135deg,
+    var(--cyan), transparent 30%, transparent 70%, var(--red)) border-box;
+  -webkit-mask:
+    linear-gradient(#fff 0 0) padding-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  z-index: 2;
+  pointer-events: none;
+  animation: photoGlowRotate 8s linear infinite;
+}
+@keyframes photoGlowRotate {
+  0%   { filter: hue-rotate(0deg); }
+  100% { filter: hue-rotate(360deg); }
+}
+
+.photo-scan {
+  position: absolute;
+  left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(to right, transparent, var(--cyan), transparent);
+  box-shadow: 0 0 12px var(--cyan);
+  z-index: 4;
+  animation: photoScan 4s linear infinite;
+  pointer-events: none;
+}
+@keyframes photoScan {
+  0%   { top: 0;    opacity: 0; }
+  10%  {            opacity: 1; }
+  90%  {            opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+
+.photo-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+  filter: contrast(1.05) saturate(1.1);
+  transition: transform .6s ease, filter .3s;
+}
+.photo-frame:hover .photo-img {
+  transform: scale(1.04);
+  filter: contrast(1.1) saturate(1.2) brightness(1.1);
+}
+
+.photo-fallback {
+  position: absolute;
+  inset: 0;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: linear-gradient(135deg, var(--bg3), var(--bg4));
+  z-index: 1;
+}
+.pf-icon { font-size: 60px; opacity: .4; }
+.pf-text {
+  font-family: var(--fhead);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  color: var(--cyan);
+}
+.pf-sub {
+  font-family: var(--fmono);
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: #fff;
+  opacity: .4;
+}
+
+.photo-label {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  padding: 20px 24px;
+  background: linear-gradient(to top, rgba(2, 4, 8, 0.95) 0%, rgba(2, 4, 8, 0.7) 60%, transparent 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 3;
+  pointer-events: none;
+}
+.pl-name {
+  font-family: var(--fhead);
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: 6px;
+  color: #fff;
+  text-shadow: 0 0 12px var(--cyan);
+}
+.pl-role {
+  font-family: var(--fmono);
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--cyan);
+}
+
+/* HUD scanlines on photo */
+.photo-frame::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(0, 229, 255, 0.04) 3px,
+    rgba(0, 229, 255, 0.04) 4px
+  );
+  mix-blend-mode: screen;
+}
+/*  NOTE: the previous IDENTITY: VERIFIED ::after pseudo-element has been
+    intentionally REMOVED in this redesign per user request.            */
+
+/* ── GLITCH DECRYPT OVERLAY (shows on scroll-into-view) ── */
+.photo-glitch {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  background: var(--bg3);
+  pointer-events: none;
+  overflow: hidden;
+  opacity: 1;
+  transition: opacity 0.6s ease 0.4s;
+}
+.photo-frame.decrypted .photo-glitch { opacity: 0; }
+
+.pg-bar {
+  position: absolute;
+  left: 0; right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, transparent, rgba(0, 229, 255, 0.8), transparent);
+  mix-blend-mode: screen;
+}
+.pg-bar-1 { animation: pgScan1 1.2s ease-in-out infinite; }
+.pg-bar-2 { animation: pgScan2 0.8s ease-in-out infinite; background: linear-gradient(90deg, transparent, rgba(255, 34, 68, 0.7), transparent); }
+.pg-bar-3 { animation: pgScan3 1.6s ease-in-out infinite; }
+@keyframes pgScan1 {
+  0%, 100% { top: -10%; opacity: 0; }
+  10%      { opacity: 1; }
+  90%      { opacity: 1; }
+  100%     { top: 110%; opacity: 0; }
+}
+@keyframes pgScan2 {
+  0%, 100% { top: 80%; opacity: 0; }
+  20%      { opacity: 1; top: 60%; }
+  60%      { top: 20%; opacity: 1; }
+  100%     { top: 0;   opacity: 0; }
+}
+@keyframes pgScan3 {
+  0%, 100% { top: 30%; opacity: 0; }
+  30%      { opacity: 1; top: 50%; }
+  70%      { opacity: 1; top: 80%; }
+  100%     { top: 100%; opacity: 0; }
+}
+
+.pg-noise {
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(0deg,  rgba(0, 229, 255, 0.04) 0 1px, transparent 1px 4px),
+    repeating-linear-gradient(90deg, rgba(255, 34, 68, 0.03) 0 1px, transparent 1px 7px);
+  animation: pgNoise 0.15s steps(4) infinite;
+}
+@keyframes pgNoise {
+  0%   { transform: translate(0); }
+  25%  { transform: translate(-2px, 1px); }
+  50%  { transform: translate(2px, -1px); }
+  75%  { transform: translate(-1px, 2px); }
+  100% { transform: translate(0); }
+}
+
+.pg-text {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--fmono);
+  font-size: 14px;
+  letter-spacing: 6px;
+  color: var(--cyan);
+  text-shadow: 0 0 12px var(--cyan);
+  white-space: nowrap;
+  animation: pgText 1s ease-in-out infinite;
+}
+@keyframes pgText {
+  0%, 100% { opacity: 0.6; }
+  50%      { opacity: 1; }
+}
+
+@media (max-width: 900px) {
+  .journey-grid { grid-template-columns: 1fr; gap: 48px; }
+  .photo-frame { max-width: 340px; margin: 0 auto; }
+}
+
+/* ════════════════════════════════════════════════════════════
+   GSAP REVEAL HELPERS — assigned via JS
+   ════════════════════════════════════════════════════════════ */
+.gs-fade-up   { opacity: 0; transform: translateY(40px); }
+.gs-fade-left { opacity: 0; transform: translateX(-40px); }
+.gs-fade-right{ opacity: 0; transform: translateX(40px); }
+.gs-zoom-in   { opacity: 0; transform: scale(0.9); }

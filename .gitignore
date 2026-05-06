@@ -1,0 +1,12 @@
+# Ignore entire assets folder
+assets/
+
+# Ignore specific data file
+data/data.js
+
+# Keep folders but ignore their contents
+models/*
+!models/.gitkeep
+
+videos/*
+!videos/.gitkeep

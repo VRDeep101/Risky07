@@ -1,0 +1,295 @@
+/* ============================================================
+   loader.css — Boot loader (Sharingan + DNA + Cyber + Glitch)
+   Plays for ~3s while GLB preloads. Removed by loader.js.
+   ============================================================ */
+
+.boot-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: #020408;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: opacity .8s cubic-bezier(.4,0,.2,1), transform .8s cubic-bezier(.4,0,.2,1);
+}
+.boot-loader.fade-out {
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(1.04);
+}
+
+/* DNA / cyber background canvas */
+#loaderCanvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+/* ── CENTER STACK ────────────────────────────────────────── */
+.loader-center {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+/* ── SHARINGAN-INSPIRED EYE ──────────────────────────────── */
+.loader-eye {
+  position: relative;
+  width: 160px;
+  height: 160px;
+  margin-bottom: 12px;
+}
+.eye-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 34, 68, 0.5);
+}
+.eye-ring-1 {
+  box-shadow: inset 0 0 24px rgba(255, 34, 68, 0.5),
+              0 0 24px rgba(255, 34, 68, 0.3);
+  animation: eyeRotate 6s linear infinite;
+}
+.eye-ring-2 {
+  inset: 18px;
+  border-style: dashed;
+  border-color: rgba(0, 229, 255, 0.6);
+  animation: eyeRotate 4s linear infinite reverse;
+}
+.eye-ring-3 {
+  inset: 38px;
+  border-color: rgba(255, 34, 68, 0.7);
+  border-width: 2px;
+  animation: eyeRotate 8s linear infinite;
+}
+@keyframes eyeRotate {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* Tomoe (the comma marks) */
+.tomoe {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  background: #ff2244;
+  border-radius: 50%;
+  box-shadow: 0 0 12px #ff2244;
+  top: 50%;
+  left: 50%;
+  transform-origin: 0 60px;
+}
+.tomoe::after {
+  content: '';
+  position: absolute;
+  width: 8px;
+  height: 22px;
+  background: linear-gradient(to bottom, #ff2244, transparent);
+  top: 8px;
+  left: 3px;
+  border-radius: 0 0 50% 50%;
+}
+.tomoe-1 { animation: tomoeSpin 3s linear infinite; transform: rotate(0deg) translate(-50%, -50%); }
+.tomoe-2 { animation: tomoeSpin 3s linear infinite; animation-delay: -1s; }
+.tomoe-3 { animation: tomoeSpin 3s linear infinite; animation-delay: -2s; }
+@keyframes tomoeSpin {
+  from { transform: translate(-50%, -50%) rotate(0deg) translateY(-60px); }
+  to   { transform: translate(-50%, -50%) rotate(360deg) translateY(-60px); }
+}
+
+.eye-pupil {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 30px; height: 30px;
+  background: radial-gradient(circle, #ff2244 0%, #800011 60%, #200005 100%);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 20px #ff2244, inset 0 0 12px rgba(0,0,0,.8);
+  animation: pupilPulse 1.2s ease-in-out infinite;
+}
+@keyframes pupilPulse {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); }
+  50%      { transform: translate(-50%, -50%) scale(1.15); }
+}
+
+.eye-glow {
+  position: absolute;
+  inset: -20px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,34,68,.25) 0%, transparent 60%);
+  animation: pupilPulse 1.5s ease-in-out infinite;
+}
+
+/* ── GLITCH TITLE ────────────────────────────────────────── */
+.loader-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 56px;
+  font-weight: 900;
+  letter-spacing: 14px;
+  color: #fff;
+  position: relative;
+  margin-top: 6px;
+  text-shadow: 0 0 24px rgba(0, 229, 255, 0.6);
+}
+.loader-title::before,
+.loader-title::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  overflow: hidden;
+}
+.loader-title::before {
+  color: #ff2244;
+  animation: glitch1 2.5s infinite linear alternate-reverse;
+  clip-path: polygon(0 0, 100% 0, 100% 33%, 0 33%);
+}
+.loader-title::after {
+  color: #00e5ff;
+  animation: glitch2 1.8s infinite linear alternate-reverse;
+  clip-path: polygon(0 67%, 100% 67%, 100% 100%, 0 100%);
+}
+@keyframes glitch1 {
+  0%, 100% { transform: translate(0); }
+  20% { transform: translate(-2px, 1px); }
+  40% { transform: translate(-1px, -1px); }
+  60% { transform: translate(2px, 1px); }
+  80% { transform: translate(1px, -2px); }
+}
+@keyframes glitch2 {
+  0%, 100% { transform: translate(0); }
+  20% { transform: translate(2px, -1px); }
+  40% { transform: translate(1px, 1px); }
+  60% { transform: translate(-2px, -1px); }
+  80% { transform: translate(-1px, 2px); }
+}
+
+/* ── STATUS LINE ─────────────────────────────────────────── */
+.loader-sub {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 4px;
+  color: rgba(255, 255, 255, 0.7);
+  display: flex;
+  gap: 8px;
+}
+.ls-bracket {
+  color: #00e5ff;
+  font-weight: 700;
+}
+.ls-text {
+  min-width: 220px;
+  text-align: center;
+}
+
+/* ── PROGRESS BAR ────────────────────────────────────────── */
+.loader-bar-wrap {
+  position: relative;
+  width: 380px;
+  max-width: 80vw;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(0, 229, 255, 0.2);
+  margin-top: 4px;
+  overflow: hidden;
+}
+.loader-bar {
+  position: absolute;
+  top: 0; left: 0; bottom: 0;
+  width: 0%;
+  background: linear-gradient(90deg, #00e5ff, #ff2244);
+  box-shadow: 0 0 12px #00e5ff;
+  transition: width .25s linear;
+}
+.loader-bar-glow {
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 30px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.6), transparent);
+  animation: barGlow 1.4s linear infinite;
+}
+@keyframes barGlow {
+  from { left: -30px; }
+  to   { left: 100%; }
+}
+.loader-pct {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 3px;
+  color: #00e5ff;
+  text-shadow: 0 0 8px #00e5ff;
+}
+
+/* ── HEX/CODE STREAMS ────────────────────────────────────── */
+.loader-codes {
+  position: absolute;
+  bottom: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: rgba(0, 229, 255, 0.4);
+  white-space: nowrap;
+}
+.lc-row {
+  animation: lcPulse 1.5s ease-in-out infinite;
+}
+.lc-row:nth-child(2) { animation-delay: 0.4s; color: rgba(255, 34, 68, 0.5); }
+.lc-row:nth-child(3) { animation-delay: 0.8s; color: rgba(0, 255, 136, 0.5); }
+@keyframes lcPulse {
+  0%, 100% { opacity: 0.4; }
+  50%      { opacity: 1; }
+}
+
+/* ── CORNER HUD ──────────────────────────────────────────── */
+.loader-corner {
+  position: absolute;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: rgba(0, 229, 255, 0.5);
+  z-index: 10;
+}
+.lc-tl { top: 30px;    left: 30px; }
+.lc-tr { top: 30px;    right: 30px; color: rgba(255, 34, 68, 0.6); }
+.lc-bl { bottom: 30px; left: 30px; color: rgba(0, 255, 136, 0.5); }
+.lc-br { bottom: 30px; right: 30px; }
+
+/* ── SCANLINE ────────────────────────────────────────────── */
+.loader-scanline {
+  position: absolute;
+  left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(0, 229, 255, 0.6), transparent);
+  box-shadow: 0 0 12px rgba(0, 229, 255, 0.6);
+  z-index: 6;
+  animation: loaderScan 3s linear infinite;
+}
+@keyframes loaderScan {
+  0%   { top: 0;    opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  .loader-eye { width: 130px; height: 130px; }
+  .loader-title { font-size: 38px; letter-spacing: 8px; }
+  .loader-bar-wrap { width: 280px; }
+  .loader-codes { bottom: 30px; font-size: 9px; }
+  .loader-corner { font-size: 9px; }
+  .lc-tl, .lc-tr { top: 18px; }
+  .lc-bl, .lc-br { bottom: 18px; }
+}

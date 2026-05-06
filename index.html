@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<meta name="description" content="RISKY — Ethical hacker, AI agent builder, full-stack developer. Building JARVIS. Available for hire."/>
+<meta name="author" content="RISKY (Deep Lambhade)"/>
+<meta name="theme-color" content="#020408"/>
+
+<!-- ── SECURITY HEADERS (meta tag fallback when no server) ── -->
+<meta http-equiv="X-Content-Type-Options" content="nosniff"/>
+<meta http-equiv="X-Frame-Options" content="DENY"/>
+<meta name="referrer" content="strict-origin-when-cross-origin"/>
+<meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=()"/>
+<meta http-equiv="Content-Security-Policy" content="
+  default-src 'self';
+  script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://cdn.emailjs.com;
+  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+  img-src 'self' data: blob: https:;
+  font-src 'self' https://fonts.gstatic.com;
+  connect-src 'self' https://api.emailjs.com;
+  media-src 'self' blob:;
+  worker-src 'self' blob:;
+  frame-ancestors 'none';
+  base-uri 'self';
+  form-action 'self';
+"/>
+
+<title>RISKY — Portfolio v3.0</title>
+<link rel="icon" type="image/png" href="assets/risky-logo.png"/>
+<link rel="preload" as="image" href="assets/risky-logo.png"/>
+
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800;900&family=Share+Tech+Mono&family=Exo+2:wght@200;300;400;600;700&display=swap" rel="stylesheet"/>
+
+<link rel="stylesheet" href="css/loader.css"/>
+<link rel="stylesheet" href="css/style.css"/>
+<link rel="stylesheet" href="css/animations.css"/>
+<link rel="stylesheet" href="css/extras.css"/>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════════════════
+     LOADING SCREEN (DNA + Sharingan + Cyber + Glitch)
+     Removed by loader.js after GLB loads + min 3s
+     ════════════════════════════════════════════════════════════ -->
+<div id="bootLoader" class="boot-loader" aria-hidden="true">
+  <canvas id="loaderCanvas"></canvas>
+
+  <div class="loader-center">
+    <!-- Sharingan-inspired tomoe ring -->
+    <div class="loader-eye">
+      <div class="eye-ring eye-ring-1"></div>
+      <div class="eye-ring eye-ring-2"></div>
+      <div class="eye-ring eye-ring-3"></div>
+      <div class="tomoe tomoe-1"></div>
+      <div class="tomoe tomoe-2"></div>
+      <div class="tomoe tomoe-3"></div>
+      <div class="eye-pupil"></div>
+      <div class="eye-glow"></div>
+    </div>
+
+    <!-- Glitchy text -->
+    <div class="loader-title" data-text="RISKY">RISKY</div>
+    <div class="loader-sub">
+      <span class="ls-bracket">[</span>
+      <span class="ls-text" id="loaderStatus">INITIALIZING JARVIS CORE</span>
+      <span class="ls-bracket">]</span>
+    </div>
+
+    <!-- Progress bar -->
+    <div class="loader-bar-wrap">
+      <div class="loader-bar" id="loaderBar"></div>
+      <div class="loader-bar-glow"></div>
+    </div>
+    <div class="loader-pct" id="loaderPct">0%</div>
+
+    <!-- Hex codes scrolling -->
+    <div class="loader-codes">
+      <div class="lc-row" id="lcRow1">0x4E:&nbsp;7F&nbsp;A2&nbsp;C3&nbsp;1E&nbsp;DE</div>
+      <div class="lc-row" id="lcRow2">SCAN:&nbsp;PORT&nbsp;1337&nbsp;OPEN</div>
+      <div class="lc-row" id="lcRow3">DNA:&nbsp;AGTC-CGAT-TAGC</div>
+    </div>
+  </div>
+
+  <!-- Corner HUD elements -->
+  <div class="loader-corner lc-tl">[ SYS:BOOT ]</div>
+  <div class="loader-corner lc-tr">[ v3.0.0 ]</div>
+  <div class="loader-corner lc-bl">[ KERNEL_OK ]</div>
+  <div class="loader-corner lc-br">[ SECURE_LINK ]</div>
+
+  <div class="loader-scanline"></div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════
+     GLOBAL OVERLAYS
+     ════════════════════════════════════════════════════════════ -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+<canvas id="codeRainCanvas"></canvas>
+<canvas id="particleCanvas"></canvas>
+<div class="scanlines"></div>
+
+<!-- ════════════════════════════════════════════════════════════
+     NAVIGATION
+     ════════════════════════════════════════════════════════════ -->
+<nav id="navbar" aria-label="Primary">
+  <div class="nav-logo"><img src="assets/risky-logo.png" alt="RISKY"/></div>
+  <ul class="nav-links">
+    <li><a href="#hero"     class="nav-link">HOME</a></li>
+    <li><a href="#about"    class="nav-link">ABOUT</a></li>
+    <li><a href="#skills"   class="nav-link">SKILLS</a></li>
+    <li><a href="#projects" class="nav-link">PROJECTS</a></li>
+    <li><a href="#timeline" class="nav-link">JOURNEY</a></li>
+    <li><a href="#contact"  class="nav-link">CONTACT</a></li>
+    <li><a href="#terminal" class="nav-link nav-hack">TERMINAL</a></li>
+  </ul>
+  <div class="nav-status">
+    <span class="status-dot"></span>
+    <span class="status-text">AVAILABLE</span>
+  </div>
+</nav>
+
+<!-- ════════════════════════════════════════════════════════════
+     HERO
+     Layout: Car drifts in from right, ends drift left-center,
+     spins on-spot. Hero content (logo, tags, CTAs) appears on
+     RIGHT side of car (right-center column).
+     ════════════════════════════════════════════════════════════ -->
+<section id="hero">
+  <canvas id="threeCanvas"></canvas>
+
+  <!-- Hero content positioned RIGHT of car (right-center area) -->
+  <div class="hero-content" id="heroContent">
+    <img src="assets/risky-logo.png" alt="RISKY" class="hero-logo-img" id="heroLogoImg"/>
+    <div class="hero-line"></div>
+    <div class="hero-tags">
+      <span class="hero-tag">ETHICAL HACKER</span>
+      <span class="hero-sep">//</span>
+      <span class="hero-tag">AI AGENT BUILDER</span>
+      <span class="hero-sep">//</span>
+      <span class="hero-tag">FULL STACK DEV</span>
+    </div>
+    <div class="hero-cta">
+      <a href="#projects" class="btn-primary">VIEW WORK <span>→</span></a>
+      <a href="#contact"  class="btn-ghost">CONTACT</a>
+    </div>
+  </div>
+
+  <div class="hero-hud hud-tl">[ SYS:ONLINE ]</div>
+  <div class="hero-hud hud-tr">[ v3.0.0 ]</div>
+  <div class="hero-hud hud-bl">[ INDIA ]</div>
+  <div class="hero-hud hud-br" id="clock">[ 00:00:00 ]</div>
+
+  <div class="scroll-hint"><span>SCROLL</span><div class="scroll-line"></div></div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════
+     ABOUT
+     ════════════════════════════════════════════════════════════ -->
+<section id="about" class="section reveal-section">
+  <div class="sec-header">
+    <span class="sec-num">01</span>
+    <h2 class="sec-title">ABOUT ME</h2>
+    <div class="sec-rule"></div>
+  </div>
+  <div class="about-grid">
+    <div>
+      <p class="about-lead">I don't fit in one box.<br/>I never did.</p>
+      <p class="about-body">I'm Risky — developer, ethical hacker, AI agent builder, content creator and freelancer operating out of India. I learn fast, build faster, and I don't stop until it works.</p>
+      <p class="about-body">Right now I'm building JARVIS — my own AI system. Full-stack dev, cybersecurity, ML, agents. No shortcuts. Just the work.</p>
+      <div class="about-stats">
+        <div class="stat"><div class="stat-n" data-count="9">0</div><div class="stat-l">SKILLS</div></div>
+        <div class="stat"><div class="stat-n" data-count="0">0</div><div class="stat-l">EXCUSES</div></div>
+        <div class="stat"><div class="stat-n" data-count="100">0</div><div class="stat-l">% DRIVE</div></div>
+      </div>
+    </div>
+    <div>
+      <div class="hud-box">
+        <div class="hud-c hud-c-tl"></div><div class="hud-c hud-c-tr"></div>
+        <div class="hud-c hud-c-bl"></div><div class="hud-c hud-c-br"></div>
+        <div class="hud-title">IDENTITY.SYS</div>
+        <div class="hud-rows">
+          <div class="hud-row"><span class="hk">NAME</span><span class="hv">RISKY</span></div>
+          <div class="hud-row"><span class="hk">ROLE</span><span class="hv">MULTI-CLASS OPERATOR</span></div>
+          <div class="hud-row"><span class="hk">BASE</span><span class="hv">INDIA</span></div>
+          <div class="hud-row"><span class="hk">STATUS</span><span class="hv hv-green">AVAILABLE FOR HIRE</span></div>
+          <div class="hud-row"><span class="hk">GITHUB</span><span class="hv"><a href="https://github.com/VRDeep101" target="_blank" rel="noopener noreferrer">VRDeep101</a></span></div>
+          <div class="hud-row"><span class="hk">EMAIL</span><span class="hv"><a href="mailto:sirfrisky07@gmail.com">sirfrisky07</a></span></div>
+          <div class="hud-row"><span class="hk">MISSION</span><span class="hv">BUILD JARVIS. REAL ONE.</span></div>
+          <div class="hud-row"><span class="hk">THREAT LVL</span><span class="hv hv-red">MAXIMUM</span></div>
+        </div>
+        <div class="hud-scan"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════
+     SKILLS
+     ════════════════════════════════════════════════════════════ -->
+<section id="skills" class="section reveal-section">
+  <div class="sec-header">
+    <span class="sec-num">02</span>
+    <h2 class="sec-title">SKILLS</h2>
+    <div class="sec-rule"></div>
+  </div>
+  <div class="skills-tabs" id="skillsTabs"></div>
+  <div class="skills-panel" id="skillsPanel"></div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════
+     PROJECTS
+     ════════════════════════════════════════════════════════════ -->
+<section id="projects" class="section reveal-section">
+  <div class="sec-header">
+    <span class="sec-num">03</span>
+    <h2 class="sec-title">PROJECTS</h2>
+    <div class="sec-rule"></div>
+  </div>
+  <div class="projects-grid" id="projectsGrid"></div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════
+     TIMELINE / JOURNEY (with profile photo)
+     ════════════════════════════════════════════════════════════ -->
+<section id="timeline" class="section reveal-section">
+  <div class="sec-header">
+    <span class="sec-num">04</span>
+    <h2 class="sec-title">JOURNEY</h2>
+    <div class="sec-rule"></div>
+  </div>
+  <div class="journey-grid">
+    <div class="timeline" id="timelineList"></div>
+    <div class="journey-photo">
+      <div class="photo-frame" id="photoFrame">
+        <div class="ph-c ph-c-tl"></div><div class="ph-c ph-c-tr"></div>
+        <div class="ph-c ph-c-bl"></div><div class="ph-c ph-c-br"></div>
+        <div class="photo-glow"></div>
+        <div class="photo-scan"></div>
+
+        <!-- Glitch overlay shown during scroll-into-view -->
+        <div class="photo-glitch" id="photoGlitch">
+          <div class="pg-bar pg-bar-1"></div>
+          <div class="pg-bar pg-bar-2"></div>
+          <div class="pg-bar pg-bar-3"></div>
+          <div class="pg-noise"></div>
+          <div class="pg-text">DECRYPTING…</div>
+        </div>
+
+        <img src="assets/Deep.jpeg" alt="Deep aka Risky" class="photo-img" id="photoImg" onerror="this.parentElement.querySelector('.photo-fallback').style.display='flex';this.style.display='none'"/>
+        <div class="photo-fallback">
+          <div class="pf-icon">📷</div>
+          <div class="pf-text">DEEP.JPEG</div>
+          <div class="pf-sub">Drop your photo in /assets/ folder</div>
+        </div>
+        <div class="photo-label">
+          <span class="pl-name">DEEP</span>
+          <span class="pl-role">A.K.A. RISKY</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════
+     CONTACT — secure form (honeypot + rate limit + EmailJS)
+     ════════════════════════════════════════════════════════════ -->
+<section id="contact" class="section reveal-section">
+  <div class="sec-header">
+    <span class="sec-num">05</span>
+    <h2 class="sec-title">CONTACT</h2>
+    <div class="sec-rule"></div>
+  </div>
+  <div class="contact-grid">
+    <div>
+      <p class="contact-lead">Got a project?<br/>An idea? A bounty?<br/>Let's talk.</p>
+      <div class="contact-links" id="contactLinks"></div>
+
+      <!-- Tells user where their data goes (transparency) -->
+      <div class="data-info" id="dataInfo">
+        <div class="di-head">[ DATA TRANSPARENCY ]</div>
+        <div class="di-line">→ Form messages go to <span class="di-mail">deeplambhade101@gmail.com</span></div>
+        <div class="di-line">→ Backup stored in your browser only (localStorage)</div>
+        <div class="di-line">→ No third-party tracking. No cookies set.</div>
+      </div>
+    </div>
+
+    <form class="contact-form" id="contactForm" autocomplete="off" novalidate>
+      <!-- Honeypot field (hidden from real users, bots fill it) -->
+      <div class="honeypot" aria-hidden="true">
+        <label>Don't fill this in: <input type="text" name="website" tabindex="-1" autocomplete="off"/></label>
+      </div>
+
+      <div class="form-row">
+        <label class="form-lbl" for="cf-name">YOUR NAME</label>
+        <input type="text" id="cf-name" name="name" class="form-inp" placeholder="John Doe" required maxlength="80" pattern="[A-Za-z\s\-\.]{2,80}"/>
+      </div>
+      <div class="form-row">
+        <label class="form-lbl" for="cf-email">EMAIL</label>
+        <input type="email" id="cf-email" name="email" class="form-inp" placeholder="john@email.com" required maxlength="120"/>
+      </div>
+      <div class="form-row">
+        <label class="form-lbl" for="cf-msg">MESSAGE</label>
+        <textarea id="cf-msg" name="message" class="form-inp form-ta" placeholder="Tell me what you need..." required maxlength="2000"></textarea>
+        <div class="form-counter"><span id="msgCount">0</span>/2000</div>
+      </div>
+
+      <button type="submit" class="btn-primary" id="cfSubmit">SEND MESSAGE <span>→</span></button>
+
+      <div class="form-status" id="formStatus" aria-live="polite"></div>
+    </form>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════
+     TERMINAL + HOLOGRAPHIC EARTH
+     Side-by-side layout. Earth occupies the right space.
+     ════════════════════════════════════════════════════════════ -->
+<section id="terminal" class="section reveal-section">
+  <div class="sec-header">
+    <span class="sec-num">06</span>
+    <h2 class="sec-title">TERMINAL</h2>
+    <div class="sec-rule"></div>
+  </div>
+
+  <div class="term-layout">
+    <!-- Left: terminal -->
+    <div class="term-box">
+      <div class="term-bar">
+        <span class="td td-r"></span><span class="td td-y"></span><span class="td td-g"></span>
+        <span class="term-title">risky@jarvis:~$</span>
+        <span class="term-tag">SECURE_SHELL</span>
+      </div>
+      <div class="term-out" id="termOut"></div>
+      <div class="term-in-row">
+        <span class="term-prompt">risky@jarvis:~$&nbsp;</span>
+        <input type="text" class="term-in" id="termIn" placeholder="type 'help'" autocomplete="off" spellcheck="false" maxlength="60"/>
+      </div>
+    </div>
+
+    <!-- Right: holographic earth -->
+    <div class="earth-box">
+      <div class="earth-corners">
+        <span class="ec ec-tl"></span><span class="ec ec-tr"></span>
+        <span class="ec ec-bl"></span><span class="ec ec-br"></span>
+      </div>
+      <div class="earth-title">
+        <span class="et-dot"></span> GLOBAL_NET / OPERATOR_LOCATION
+      </div>
+      <canvas id="earthCanvas"></canvas>
+      <div class="earth-info">
+        <div class="ei-row"><span class="ei-k">LAT</span><span class="ei-v">19.99°N</span></div>
+        <div class="ei-row"><span class="ei-k">LON</span><span class="ei-v">73.78°E</span></div>
+        <div class="ei-row"><span class="ei-k">ZONE</span><span class="ei-v">IST (UTC+5:30)</span></div>
+        <div class="ei-row"><span class="ei-k">NODE</span><span class="ei-v hv-green">NASHIK / IN</span></div>
+      </div>
+      <div class="earth-scan"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════
+     FOOTER
+     ════════════════════════════════════════════════════════════ -->
+<footer>
+  <div class="foot-l">
+    <span class="foot-logo">RISKY</span>
+    <span class="foot-copy">© 2025 — ALL SYSTEMS OPERATIONAL</span>
+  </div>
+  <div class="foot-r">
+    <a href="https://github.com/VRDeep101" target="_blank" rel="noopener noreferrer" class="foot-link">GITHUB</a>
+    <a href="https://www.linkedin.com/in/risky07" target="_blank" rel="noopener noreferrer" class="foot-link">LINKEDIN</a>
+    <a href="mailto:sirfrisky07@gmail.com" class="foot-link">EMAIL</a>
+  </div>
+</footer>
+
+<!-- ════════════════════════════════════════════════════════════
+     SCRIPTS — order matters!
+     1. Three.js + GSAP libs
+     2. Security helpers
+     3. Portfolio data
+     4. Loader (boots first)
+     5. Three scene (car) + holographic earth
+     6. Terminal + scroll animations + contact + main
+     ════════════════════════════════════════════════════════════ -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/DRACOLoader.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
+<script src="js/security.js"></script>
+<script src="data/data.js"></script>
+<script src="js/loader.js"></script>
+<script src="js/three-scene.js"></script>
+<script src="js/holographic-earth.js"></script>
+<script src="js/terminal.js"></script>
+<script src="js/scroll-animations.js"></script>
+<script src="js/contact.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
