@@ -95,7 +95,7 @@ Portfolio/
 │   ├── risky-logo.png       ← logo PNG (was double-extension; renamed)
 │   └── Deep.jpeg            ← profile photo
 ├── models/
-│   └── lambo.glb            ← hero car (~21 MB)
+│   └── lambo.glb            ← hero car (~8 MB)
 ├── videos/
 │   └── jarvis.mp4           ← project hover video
 ├── css/
