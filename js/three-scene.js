@@ -597,6 +597,49 @@
     renderer.render(scene, cam);
   }
 
+  // ── GLTFLoader recovery: if the primary CDN didn't expose it,
+  //    dynamically load from alternate CDNs before giving up.
+  function ensureGLTFLoader() {
+    return new Promise((resolve) => {
+      if (typeof THREE.GLTFLoader === 'function') {
+        resolve(true);
+        return;
+      }
+      console.warn('[three-scene] THREE.GLTFLoader missing · trying alternate CDNs');
+      const candidates = [
+        'https://unpkg.com/three@0.147.0/examples/js/loaders/GLTFLoader.js',
+        'https://cdn.jsdelivr.net/npm/three@0.137.0/examples/js/loaders/GLTFLoader.js',
+        'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js'
+      ];
+      let i = 0;
+      function tryNext() {
+        if (i >= candidates.length) {
+          console.error('[three-scene] all GLTFLoader CDNs failed');
+          resolve(false);
+          return;
+        }
+        const url = candidates[i++];
+        const s = document.createElement('script');
+        s.src = url;
+        s.onload = () => {
+          if (typeof THREE.GLTFLoader === 'function') {
+            console.log('[three-scene] ✅ GLTFLoader loaded from', url);
+            resolve(true);
+          } else {
+            console.warn('[three-scene] script loaded but no GLTFLoader on', url);
+            tryNext();
+          }
+        };
+        s.onerror = () => {
+          console.warn('[three-scene] failed to fetch', url);
+          tryNext();
+        };
+        document.head.appendChild(s);
+      }
+      tryNext();
+    });
+  }
+
   // ── BOOT — wait for loader to finish ───────────────────────
   function parseBuffer(buffer, onSuccess, onError) {
     if (!buffer) {
@@ -615,7 +658,7 @@
     }
   }
 
-  function boot(detail) {
+  async function boot(detail) {
     detail = detail || {};
     const preParsed = detail.preParsed || window.RISKY_GLB || null;
     const buffer    = detail.buffer    || window.RISKY_GLB_BUFFER || null;
@@ -623,6 +666,15 @@
     console.log('[three-scene] boot · strategy:', detail.strategy || 'unknown',
       '· buffer:', buffer ? `${(buffer.byteLength / 1048576).toFixed(2)}MB` : 'null',
       '· preParsed:', preParsed ? 'yes' : 'no');
+
+    // FIRST: ensure GLTFLoader is available (try alternate CDNs if needed)
+    const gltfReady = await ensureGLTFLoader();
+    if (!gltfReady) {
+      console.error('[three-scene] GLTFLoader unavailable on ALL CDNs · using fallback box');
+      makeFallback();
+      animate();
+      return;
+    }
 
     // Best case: loader already parsed the gltf (Strategy 3 path)
     if (preParsed) {
