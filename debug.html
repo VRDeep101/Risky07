@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8"/>
+<title>RISKY · GLB Debug Test</title>
+<style>
+  body { background: #020408; color: #fff; font-family: 'Courier New', monospace; padding: 30px; line-height: 1.7; }
+  h1 { color: #00e5ff; }
+  .ok    { color: #00ff88; }
+  .err   { color: #ff2244; }
+  .pend  { color: #ffbd2e; }
+  .info  { color: #00e5ff; }
+  pre { background: #0a0a0a; padding: 12px; border-left: 2px solid #00e5ff; overflow-x: auto; font-size: 12px; }
+  #log div { padding: 4px 0; border-bottom: 1px solid #1a1a1a; }
+  .progress-bar { width: 100%; height: 16px; background: #1a1a1a; margin-top: 8px; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, #00e5ff, #ff2244); width: 0%; transition: width .25s; }
+  canvas { display: block; margin-top: 24px; border: 1px solid #00e5ff; }
+</style>
+</head>
+<body>
+
+<h1>🛠 RISKY · GLB Loading Debug</h1>
+<p>Yeh page sirf yeh test karta hai ki <code>models/lambo.glb</code> load ho raha hai ya nahi. Agar yahan kaam kare, toh main site bhi kaam karega.</p>
+
+<div id="log"></div>
+
+<div class="progress-bar"><div class="progress-fill" id="bar"></div></div>
+
+<canvas id="canvas" width="600" height="400"></canvas>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+
+<script>
+const log = document.getElementById('log');
+const bar = document.getElementById('bar');
+function add(msg, cls = 'info') {
+  const d = document.createElement('div');
+  d.className = cls;
+  d.textContent = `[${new Date().toTimeString().slice(0, 8)}] ${msg}`;
+  log.appendChild(d);
+  console.log(msg);
+}
+
+(async function() {
+  // ── Test 1: Three.js loaded? ──
+  if (typeof THREE === 'undefined') {
+    add('❌ FAIL: THREE is undefined — three.js CDN nahi load hua', 'err');
+    add('   → Internet check kar, ya CDN block ho raha hai', 'err');
+    return;
+  }
+  add(`✅ THREE.js loaded (revision r${THREE.REVISION})`, 'ok');
+
+  // ── Test 2: GLTFLoader loaded? ──
+  if (typeof THREE.GLTFLoader === 'undefined') {
+    add('❌ FAIL: GLTFLoader undefined — second CDN script nahi load hua', 'err');
+    return;
+  }
+  add('✅ GLTFLoader available', 'ok');
+
+  // ── Test 3: Can we fetch the GLB? ──
+  add('⟳ Fetching models/lambo.glb...', 'pend');
+  let response;
+  try {
+    response = await fetch('models/lambo.glb');
+  } catch (e) {
+    add(`❌ FAIL: fetch threw error: ${e.message}`, 'err');
+    add('   → File path galat ho sakta hai, ya server problem', 'err');
+    return;
+  }
+
+  if (!response.ok) {
+    add(`❌ FAIL: HTTP ${response.status} ${response.statusText}`, 'err');
+    if (response.status === 404) {
+      add('   → File "models/lambo.glb" missing hai. Folder structure check kar.', 'err');
+    }
+    return;
+  }
+  add(`✅ HTTP ${response.status} OK · Content-Length: ${response.headers.get('content-length') || 'unknown'}`, 'ok');
+
+  // ── Test 4: Stream download with progress ──
+  const total = parseInt(response.headers.get('content-length') || '0', 10);
+  const reader = response.body.getReader();
+  const chunks = [];
+  let received = 0;
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    chunks.push(value);
+    received += value.length;
+    if (total) bar.style.width = `${(received / total * 100).toFixed(1)}%`;
+  }
+
+  const buffer = new Uint8Array(received);
+  let offset = 0;
+  for (const c of chunks) { buffer.set(c, offset); offset += c.length; }
+  bar.style.width = '100%';
+  add(`✅ Downloaded: ${(received / 1048576).toFixed(2)} MB`, 'ok');
+
+  // ── Test 5: Verify GLB magic bytes ──
+  const view = new DataView(buffer.buffer);
+  const magic = String.fromCharCode(view.getUint8(0), view.getUint8(1), view.getUint8(2), view.getUint8(3));
+  if (magic !== 'glTF') {
+    add(`❌ FAIL: Magic bytes "${magic}" — not a valid GLB file`, 'err');
+    return;
+  }
+  add(`✅ GLB magic bytes valid: "${magic}"`, 'ok');
+
+  // ── Test 6: Parse with GLTFLoader ──
+  add('⟳ Parsing with GLTFLoader...', 'pend');
+  const loader = new THREE.GLTFLoader();
+  loader.parse(buffer.buffer, '', (gltf) => {
+    add(`✅ Parsed successfully · ${gltf.scene.children.length} root nodes`, 'ok');
+
+    // ── Test 7: Render the car ──
+    add('⟳ Rendering 3D scene...', 'pend');
+    try {
+      const canvas = document.getElementById('canvas');
+      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+      renderer.setClearColor(0x020408, 1);
+      const scene = new THREE.Scene();
+      const cam = new THREE.PerspectiveCamera(45, 600/400, 0.1, 100);
+      cam.position.set(5, 3, 6);
+      cam.lookAt(0, 0, 0);
+
+      scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+      const dl = new THREE.DirectionalLight(0x00e5ff, 2);
+      dl.position.set(5, 10, 5);
+      scene.add(dl);
+
+      // Center & scale the car
+      const car = gltf.scene;
+      const box = new THREE.Box3().setFromObject(car);
+      const size = new THREE.Vector3();
+      box.getSize(size);
+      const scale = 4 / Math.max(size.x, size.y, size.z);
+      car.scale.setScalar(scale);
+      car.position.y = -box.min.y * scale;
+      scene.add(car);
+
+      function animate() {
+        requestAnimationFrame(animate);
+        car.rotation.y += 0.005;
+        renderer.render(scene, cam);
+      }
+      animate();
+      add('✅ Car rendering successfully · ROTATION ACTIVE', 'ok');
+      add('🎉 SAB KUCH WORKING — main site bhi kaam karega', 'ok');
+    } catch (e) {
+      add(`❌ Render FAIL: ${e.message}`, 'err');
+    }
+  }, (err) => {
+    add(`❌ Parse FAIL: ${err.message || err}`, 'err');
+  });
+})();
+</script>
+
+</body>
+</html>

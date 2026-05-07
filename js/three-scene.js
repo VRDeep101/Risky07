@@ -31,7 +31,13 @@
   renderer.shadowMap.type     = THREE.PCFSoftShadowMap;
   renderer.toneMapping        = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.7;
-  renderer.outputEncoding     = THREE.sRGBEncoding;
+  // r152+ uses outputColorSpace / SRGBColorSpace; r128 used outputEncoding / sRGBEncoding.
+  // Set both — whichever exists takes effect, the other is silently ignored.
+  if (THREE.SRGBColorSpace !== undefined) {
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+  } else if (THREE.sRGBEncoding !== undefined) {
+    renderer.outputEncoding = THREE.sRGBEncoding;
+  }
 
   const cam = new THREE.PerspectiveCamera(40, 1, 0.1, 600);
   const scene = new THREE.Scene();
@@ -306,7 +312,14 @@
 
   // ── CAR SETUP (post-load) ──────────────────────────────────
   function setupCar(gltf) {
+    if (!gltf || !gltf.scene) {
+      console.error('[three-scene] setupCar: invalid gltf, no scene');
+      makeFallback();
+      return;
+    }
     car = gltf.scene;
+
+    // Enhance materials for cyberpunk look
     car.traverse(c => {
       if (!c.isMesh) return;
       c.castShadow = c.receiveShadow = true;
@@ -319,19 +332,37 @@
         m.needsUpdate = true;
       });
     });
+
+    // Compute bounding box for normalization
     const box = new THREE.Box3().setFromObject(car);
     const sz  = new THREE.Vector3();
     box.getSize(sz);
-    const sc = 7.0 / Math.max(sz.x, sz.z);
+
+    // Detect zero-size (broken model) — fallback if so
+    const maxDim = Math.max(sz.x, sz.y, sz.z);
+    if (!isFinite(maxDim) || maxDim <= 0.01) {
+      console.error('[three-scene] setupCar: zero-size model, using fallback');
+      makeFallback();
+      return;
+    }
+
+    // Scale so longest horizontal dim is ~7 units
+    // Use longest of x or z (whichever is the car's length)
+    const longHoriz = Math.max(sz.x, sz.z);
+    const sc = 7.0 / longHoriz;
     car.scale.setScalar(sc);
+
+    // Recompute box after scale & ground the car
     box.setFromObject(car);
     car.position.y = -box.min.y;
-    car.position.x = 50;
+    car.position.x = 50;     // start far right
     car.position.z = 0.5;
-    // Face leftwards (we move from +x to -x)
+    // Face leftwards (we move from +x to -x). Adjust if model imports facing different way.
     car.rotation.y = Math.PI;
+
     scene.add(car);
     phase = 'drift';
+    console.log(`[three-scene] car ready · scale=${sc.toFixed(2)} · size=${sz.x.toFixed(1)}x${sz.y.toFixed(1)}x${sz.z.toFixed(1)}`);
   }
 
   function makeFallback() {
@@ -567,40 +598,117 @@
   }
 
   // ── BOOT — wait for loader to finish ───────────────────────
+  function parseBuffer(buffer, onSuccess, onError) {
+    if (!buffer) {
+      onError(new Error('null buffer'));
+      return;
+    }
+    if (typeof THREE.GLTFLoader === 'undefined') {
+      onError(new Error('GLTFLoader not loaded'));
+      return;
+    }
+    try {
+      const ldr = new THREE.GLTFLoader();
+      ldr.parse(buffer, '', onSuccess, onError);
+    } catch (e) {
+      onError(e);
+    }
+  }
+
   function boot(detail) {
-    const gltf = (detail && detail.glb) || window.RISKY_GLB || null;
-    if (gltf) {
-      setupCar(gltf);
-    } else if (typeof THREE.GLTFLoader !== 'undefined') {
-      // Loader didn't preload — fetch now as fallback (no draco — file doesn't need it)
+    detail = detail || {};
+    const preParsed = detail.preParsed || window.RISKY_GLB || null;
+    const buffer    = detail.buffer    || window.RISKY_GLB_BUFFER || null;
+
+    console.log('[three-scene] boot · strategy:', detail.strategy || 'unknown',
+      '· buffer:', buffer ? `${(buffer.byteLength / 1048576).toFixed(2)}MB` : 'null',
+      '· preParsed:', preParsed ? 'yes' : 'no');
+
+    // Best case: loader already parsed the gltf (Strategy 3 path)
+    if (preParsed) {
+      console.log('[three-scene] using pre-parsed gltf');
       try {
-        const ldr = new THREE.GLTFLoader();
-        ldr.load('models/lambo.glb',
-          g => setupCar(g),
-          undefined,
-          (err) => {
-            console.warn('[three-scene] GLB load failed', err);
-            makeFallback();
-          }
-        );
+        setupCar(preParsed);
       } catch (e) {
-        console.warn('[three-scene] load fallback', e);
+        console.error('[three-scene] setupCar failed on pre-parsed:', e);
         makeFallback();
       }
-    } else {
+      animate();
+      return;
+    }
+
+    // Buffer case: parse it ourselves (Strategies 1 & 2)
+    if (buffer) {
+      parseBuffer(
+        buffer,
+        (gltf) => {
+          console.log('[three-scene] ✅ buffer parsed successfully');
+          try {
+            setupCar(gltf);
+          } catch (e) {
+            console.error('[three-scene] setupCar failed:', e);
+            makeFallback();
+          }
+        },
+        (err) => {
+          console.error('[three-scene] ❌ buffer parse FAILED:', err);
+          // Last-ditch: try direct GLTFLoader.load
+          tryDirectLoad();
+        }
+      );
+      animate();
+      return;
+    }
+
+    // No buffer at all — try direct load
+    tryDirectLoad();
+    animate();
+  }
+
+  function tryDirectLoad() {
+    if (typeof THREE.GLTFLoader === 'undefined') {
+      console.warn('[three-scene] GLTFLoader unavailable · using fallback box');
+      makeFallback();
+      return;
+    }
+    console.log('[three-scene] last-ditch: direct GLTFLoader.load');
+    try {
+      const ldr = new THREE.GLTFLoader();
+      ldr.load(
+        'models/lambo.glb',
+        (g) => {
+          console.log('[three-scene] ✅ direct load succeeded');
+          try { setupCar(g); }
+          catch (e) { console.error('[three-scene] setupCar failed:', e); makeFallback(); }
+        },
+        undefined,
+        (err) => {
+          console.error('[three-scene] ❌ direct load FAILED:', err);
+          makeFallback();
+        }
+      );
+    } catch (e) {
+      console.error('[three-scene] direct load exception:', e);
       makeFallback();
     }
-    animate();
   }
 
   // If loader already finished before we attached
   if (window.RISKY_LOADER_DONE) {
-    boot({ glb: window.RISKY_GLB });
+    boot({
+      buffer: window.RISKY_GLB_BUFFER,
+      preParsed: window.RISKY_GLB
+    });
   } else {
     window.addEventListener('risky:loaderDone', (ev) => boot(ev.detail), { once: true });
-    // Hard safety: if loader event never fires within 14s, boot anyway
     setTimeout(() => {
-      if (phase === 'idle') boot({ glb: window.RISKY_GLB || null });
-    }, 14000);
+      if (phase === 'idle') {
+        console.warn('[three-scene] loader event never fired · forcing boot');
+        boot({
+          buffer: window.RISKY_GLB_BUFFER || null,
+          preParsed: window.RISKY_GLB || null
+        });
+      }
+    }, 65000);
   }
 })();
