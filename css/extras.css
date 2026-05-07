@@ -18,11 +18,13 @@
   align-items: start;
 }
 .journey-photo {
-  position: relative;
+  position: sticky;
+  top: 100px;            /* stays visible while scrolling timeline */
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding-top: 20px;
+  padding-top: 0;        /* was 20px — was pushing photo below "Building JARVIS" row */
+  margin-top: -8px;      /* tiny pull-up to align with first .tl-item dot */
 }
 
 .photo-frame {

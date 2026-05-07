@@ -169,6 +169,36 @@ nav.scrolled {
   background: var(--bg);
   display: block; /* let content position via absolute */
 }
+/* Smooth fade from hero (with grid floor) into the about section.
+   Without this the grid abruptly cuts off and looks like a tear. */
+#hero::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 220px;
+  background: linear-gradient(to bottom,
+    transparent 0%,
+    rgba(2, 4, 8, 0.55) 45%,
+    var(--bg) 92%);
+  pointer-events: none;
+  z-index: 6;
+}
+/* Subtle cyan accent line where hero meets about — gives continuity */
+#hero::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: min(60vw, 700px);
+  height: 1px;
+  transform: translateX(-50%);
+  background: linear-gradient(to right,
+    transparent, rgba(0, 229, 255, 0.6), transparent);
+  z-index: 7;
+  box-shadow: 0 0 14px rgba(0, 229, 255, 0.3);
+}
 #threeCanvas {
   position: absolute;
   inset: 0;
@@ -945,13 +975,10 @@ nav.scrolled {
 .form-status.err   { color: var(--red); }
 .form-status.pending { color: var(--cyan); opacity: .8; }
 
-/* ── TERMINAL + EARTH LAYOUT ─────────────────────────────── */
+/* ── TERMINAL LAYOUT (single-column centered, fixed height) ─ */
 .term-layout {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 24px;
-  align-items: stretch;
-  min-height: 480px;
+  display: flex;
+  justify-content: center;
 }
 
 .term-box {
@@ -961,6 +988,10 @@ nav.scrolled {
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  width: min(820px, 100%);
+  height: 460px;          /* FIXED — never grows, never stretches */
+  box-shadow: 0 0 80px rgba(0, 229, 255, 0.06),
+              0 0 1px rgba(0, 229, 255, 0.4) inset;
 }
 .term-bar {
   background: #0a0a0a;
@@ -969,6 +1000,7 @@ nav.scrolled {
   align-items: center;
   gap: 8px;
   border-bottom: 1px solid var(--dim);
+  flex-shrink: 0;
 }
 .td { width: 13px; height: 13px; border-radius: 50%; }
 .td-r { background: #ff5f57; }
@@ -991,15 +1023,17 @@ nav.scrolled {
   opacity: .8;
 }
 .term-out {
-  padding: 20px;
-  min-height: 280px;
-  flex: 1;
-  max-height: 460px;
-  overflow-y: auto;
-  line-height: 1.9;
+  padding: 20px 24px;
+  flex: 1;                /* fills the remaining space */
+  overflow-y: auto;       /* scrollable internally only */
+  line-height: 1.85;
   font-size: 13px;
   position: relative;
+  scrollbar-width: thin;
+  scrollbar-color: var(--cyan) transparent;
 }
+.term-out::-webkit-scrollbar       { width: 6px; }
+.term-out::-webkit-scrollbar-thumb { background: rgba(0, 229, 255, 0.4); }
 .t-line {
   margin: 1px 0;
   font-size: 13px;
@@ -1040,117 +1074,6 @@ nav.scrolled {
 @keyframes termLogoIn {
   from { opacity: 0; transform: scale(0.6) rotate(-12deg); }
   to   { opacity: 1; transform: scale(1)   rotate(0); }
-}
-
-.term-in-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 14px 20px;
-  border-top: 1px solid var(--dim);
-}
-.term-prompt {
-  color: var(--green);
-  font-size: 14px;
-  white-space: nowrap;
-}
-.term-in {
-  flex: 1;
-  background: transparent;
-  border: none;
-  outline: none;
-  color: var(--cyan);
-  font-family: var(--fmono);
-  font-size: 14px;
-  caret-color: var(--cyan);
-}
-
-/* Earth panel */
-.earth-box {
-  position: relative;
-  background: var(--bg3);
-  border: 1px solid var(--dim);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  min-height: 480px;
-}
-.earth-corners {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 4;
-}
-.ec {
-  position: absolute;
-  width: 18px;
-  height: 18px;
-}
-.ec-tl { top: 10px;    left: 10px;    border-top:    2px solid var(--cyan); border-left:  2px solid var(--cyan); }
-.ec-tr { top: 10px;    right: 10px;   border-top:    2px solid var(--cyan); border-right: 2px solid var(--cyan); }
-.ec-bl { bottom: 10px; left: 10px;    border-bottom: 2px solid var(--cyan); border-left:  2px solid var(--cyan); }
-.ec-br { bottom: 10px; right: 10px;   border-bottom: 2px solid var(--cyan); border-right: 2px solid var(--cyan); }
-
-.earth-title {
-  position: relative;
-  z-index: 3;
-  padding: 14px 20px;
-  font-family: var(--fmono);
-  font-size: 11px;
-  letter-spacing: 3px;
-  color: var(--cyan);
-  border-bottom: 1px solid var(--dim);
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: rgba(0, 229, 255, 0.04);
-}
-.et-dot {
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: var(--green);
-  box-shadow: 0 0 8px var(--green);
-  animation: pdot 2s ease-in-out infinite;
-}
-
-#earthCanvas {
-  position: relative;
-  z-index: 2;
-  flex: 1;
-  width: 100%;
-  display: block;
-}
-
-.earth-info {
-  position: absolute;
-  bottom: 0; left: 0; right: 0;
-  z-index: 3;
-  padding: 14px 20px;
-  background: linear-gradient(to top, rgba(2, 4, 8, 0.92), rgba(2, 4, 8, 0.5) 70%, transparent);
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 8px 24px;
-  border-top: 1px solid var(--dim);
-}
-.ei-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-family: var(--fmono);
-  font-size: 11px;
-  letter-spacing: 2px;
-}
-.ei-k { color: var(--text-4); }
-.ei-v { color: #fff; }
-
-.earth-scan {
-  position: absolute;
-  left: 0; right: 0;
-  height: 2px;
-  background: linear-gradient(to right, transparent, rgba(0, 229, 255, 0.6), transparent);
-  z-index: 3;
-  animation: hudScan 4s linear infinite;
-  pointer-events: none;
 }
 
 /* ── FOOTER ──────────────────────────────────────────────── */
@@ -1206,8 +1129,6 @@ footer {
    ════════════════════════════════════════════════════════════ */
 @media (max-width: 1100px) {
   .projects-grid { grid-template-columns: repeat(2, 1fr); }
-  .term-layout   { grid-template-columns: 1fr; }
-  .earth-box     { min-height: 420px; }
 }
 
 @media (max-width: 900px) {

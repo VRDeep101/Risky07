@@ -572,16 +572,16 @@
     if (gltf) {
       setupCar(gltf);
     } else if (typeof THREE.GLTFLoader !== 'undefined') {
-      // Loader didn't preload — fetch now as fallback
+      // Loader didn't preload — fetch now as fallback (no draco — file doesn't need it)
       try {
-        const draco = new THREE.DRACOLoader();
-        draco.setDecoderPath('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/libs/draco/');
         const ldr = new THREE.GLTFLoader();
-        ldr.setDRACOLoader(draco);
         ldr.load('models/lambo.glb',
           g => setupCar(g),
           undefined,
-          () => makeFallback()
+          (err) => {
+            console.warn('[three-scene] GLB load failed', err);
+            makeFallback();
+          }
         );
       } catch (e) {
         console.warn('[three-scene] load fallback', e);

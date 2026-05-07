@@ -39,6 +39,47 @@
   gap: 20px;
 }
 
+/* Vignette backdrop — masks the DNA helix where text would overlap.
+   Without this the helix lines visibly cross through RISKY text. */
+.loader-center::before {
+  content: '';
+  position: absolute;
+  inset: -60px -120px;
+  z-index: -1;
+  background: radial-gradient(
+    ellipse 55% 65% at center,
+    rgba(2, 4, 8, 0.95) 0%,
+    rgba(2, 4, 8, 0.88) 38%,
+    rgba(2, 4, 8, 0.55) 65%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
+/* Sequenced fade-ins — each element appears in waves, not all at once */
+.loader-eye         { opacity: 0; animation: fadeUp 0.7s ease-out 1.1s forwards; }
+.loader-title       { opacity: 0; animation: titleGlitchIn 0.9s ease-out 0.4s forwards; }
+.loader-sub         { opacity: 0; animation: fadeUp 0.5s ease-out 1.7s forwards; }
+.loader-bar-wrap    { opacity: 0; animation: fadeUp 0.5s ease-out 2.0s forwards; }
+.loader-pct         { opacity: 0; animation: fadeUp 0.5s ease-out 2.0s forwards; }
+.loader-codes       { opacity: 0; animation: fadeUp 0.5s ease-out 2.3s forwards; }
+.loader-corner      { opacity: 0; animation: fadeUp 0.5s ease-out 0.8s forwards; }
+.loader-corner.lc-tr{ animation-delay: 0.95s; }
+.loader-corner.lc-bl{ animation-delay: 1.1s;  }
+.loader-corner.lc-br{ animation-delay: 1.25s; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes titleGlitchIn {
+  0%   { opacity: 0;   transform: scale(0.9); filter: blur(8px) hue-rotate(60deg); }
+  40%  { opacity: 0.7; filter: blur(2px); }
+  60%  { opacity: 0.8; transform: translateX(-3px); }
+  72%  { transform: translateX(3px); }
+  100% { opacity: 1;   transform: scale(1) translateX(0); filter: blur(0); }
+}
+
 /* ── SHARINGAN-INSPIRED EYE ──────────────────────────────── */
 .loader-eye {
   position: relative;

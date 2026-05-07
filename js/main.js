@@ -94,7 +94,7 @@
     resize();
     window.addEventListener('resize', resize, { passive: true });
 
-    const SIZE = 16;
+    const SIZE = 18;
     let cols = 0, drops = [];
     function setupCols() {
       cols = Math.floor(cw / SIZE);
@@ -140,7 +140,7 @@
     resize();
     window.addEventListener('resize', resize, { passive: true });
 
-    const COUNT = 60;
+    const COUNT = 35;
     const parts = [];
     for (let i = 0; i < COUNT; i++) {
       parts.push({

@@ -8,7 +8,7 @@
   'use strict';
 
   const MIN_VISIBLE_MS = 3000;
-  const MAX_VISIBLE_MS = 12000; // safety cap if GLB never loads
+  const MAX_VISIBLE_MS = 25000; // bumped — 21MB GLB on slow connections needs more time
 
   const loader   = document.getElementById('bootLoader');
   const canvas   = document.getElementById('loaderCanvas');
@@ -79,6 +79,16 @@
     const amp = 60;
     const wavelength = 280;
 
+    /* Sequenced visibility: 0–600ms invisible, 600–1500ms fade in,
+       2300ms+ dim down to 35% so it doesn't fight with the text. */
+    const elapsed = time - helixStartTime;
+    let helixOp = 0;
+    if      (elapsed < 600)  helixOp = 0;
+    else if (elapsed < 1500) helixOp = (elapsed - 600) / 900;
+    else if (elapsed < 2300) helixOp = 1;
+    else                     helixOp = 0.35 + 0.65 * Math.max(0, 1 - (elapsed - 2300) / 800);
+    if (helixOp <= 0.02) return;
+
     helixParticles.forEach(p => p.phase = time * 0.0008);
 
     /* Two strands */
@@ -92,7 +102,9 @@
         if (i === 0) ctx.moveTo(x, y);
         else ctx.lineTo(x, y);
       }
-      ctx.strokeStyle = strand === 0 ? 'rgba(0, 229, 255, 0.5)' : 'rgba(255, 34, 68, 0.45)';
+      ctx.strokeStyle = strand === 0
+        ? `rgba(0, 229, 255, ${0.5 * helixOp})`
+        : `rgba(255, 34, 68, ${0.45 * helixOp})`;
       ctx.lineWidth = 1.5;
       ctx.stroke();
     }
@@ -107,20 +119,23 @@
       ctx.moveTo(x1, y);
       ctx.lineTo(x2, y);
       const grad = ctx.createLinearGradient(x1, y, x2, y);
-      grad.addColorStop(0,   'rgba(0, 229, 255, 0.6)');
-      grad.addColorStop(0.5, 'rgba(255, 255, 255, 0.5)');
-      grad.addColorStop(1,   'rgba(255, 34, 68, 0.6)');
+      grad.addColorStop(0,   `rgba(0, 229, 255, ${0.6 * helixOp})`);
+      grad.addColorStop(0.5, `rgba(255, 255, 255, ${0.5 * helixOp})`);
+      grad.addColorStop(1,   `rgba(255, 34, 68, ${0.6 * helixOp})`);
       ctx.strokeStyle = grad;
       ctx.lineWidth = 1;
       ctx.stroke();
 
       /* Anchor dots */
-      ctx.fillStyle = '#00e5ff'; ctx.beginPath(); ctx.arc(x1, y, 2, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#ff2244'; ctx.beginPath(); ctx.arc(x2, y, 2, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = `rgba(0, 229, 255, ${helixOp})`;
+      ctx.beginPath(); ctx.arc(x1, y, 2, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = `rgba(255, 34, 68, ${helixOp})`;
+      ctx.beginPath(); ctx.arc(x2, y, 2, 0, Math.PI * 2); ctx.fill();
     }
   }
 
   let rafId = null;
+  const helixStartTime = performance.now();
   function loop(time) {
     drawRain();
     drawHelix(time);
@@ -142,6 +157,13 @@
   let statusIdx = 0;
   const statusInterval = setInterval(() => {
     if (!statusEl) return;
+    /* If GLB is still loading and we're past the min hold,
+       prefer telling the user what's actually happening. */
+    if (!glbReady && glbProgress > 0 && performance.now() - startTime > MIN_VISIBLE_MS) {
+      const pct = Math.floor(glbProgress * 100);
+      statusEl.textContent = `DOWNLOADING ASSETS · ${pct}%`;
+      return;
+    }
     statusIdx = (statusIdx + 1) % statusMessages.length;
     statusEl.textContent = statusMessages[statusIdx];
   }, 380);
@@ -190,10 +212,9 @@
           resolve(null);
           return;
         }
-        const draco = new THREE.DRACOLoader();
-        draco.setDecoderPath('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/libs/draco/');
+        // GLB has no DRACO compression — skip DRACOLoader entirely
+        // (avoids a separate WASM fetch that can fail under strict CSP)
         const loaderG = new THREE.GLTFLoader();
-        loaderG.setDRACOLoader(draco);
         loaderG.load(
           'models/lambo.glb',
           (gltf) => {

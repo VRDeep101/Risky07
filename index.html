@@ -315,8 +315,7 @@
 </section>
 
 <!-- ════════════════════════════════════════════════════════════
-     TERMINAL + HOLOGRAPHIC EARTH
-     Side-by-side layout. Earth occupies the right space.
+     TERMINAL — boot animation only (no input, no earth)
      ════════════════════════════════════════════════════════════ -->
 <section id="terminal" class="section reveal-section">
   <div class="sec-header">
@@ -326,7 +325,6 @@
   </div>
 
   <div class="term-layout">
-    <!-- Left: terminal -->
     <div class="term-box">
       <div class="term-bar">
         <span class="td td-r"></span><span class="td td-y"></span><span class="td td-g"></span>
@@ -334,29 +332,6 @@
         <span class="term-tag">SECURE_SHELL</span>
       </div>
       <div class="term-out" id="termOut"></div>
-      <div class="term-in-row">
-        <span class="term-prompt">risky@jarvis:~$&nbsp;</span>
-        <input type="text" class="term-in" id="termIn" placeholder="type 'help'" autocomplete="off" spellcheck="false" maxlength="60"/>
-      </div>
-    </div>
-
-    <!-- Right: holographic earth -->
-    <div class="earth-box">
-      <div class="earth-corners">
-        <span class="ec ec-tl"></span><span class="ec ec-tr"></span>
-        <span class="ec ec-bl"></span><span class="ec ec-br"></span>
-      </div>
-      <div class="earth-title">
-        <span class="et-dot"></span> GLOBAL_NET / OPERATOR_LOCATION
-      </div>
-      <canvas id="earthCanvas"></canvas>
-      <div class="earth-info">
-        <div class="ei-row"><span class="ei-k">LAT</span><span class="ei-v">19.99°N</span></div>
-        <div class="ei-row"><span class="ei-k">LON</span><span class="ei-v">73.78°E</span></div>
-        <div class="ei-row"><span class="ei-k">ZONE</span><span class="ei-v">IST (UTC+5:30)</span></div>
-        <div class="ei-row"><span class="ei-k">NODE</span><span class="ei-v hv-green">NASHIK / IN</span></div>
-      </div>
-      <div class="earth-scan"></div>
     </div>
   </div>
 </section>
@@ -387,7 +362,6 @@
      ════════════════════════════════════════════════════════════ -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/DRACOLoader.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
@@ -396,7 +370,6 @@
 <script src="data/data.js"></script>
 <script src="js/loader.js"></script>
 <script src="js/three-scene.js"></script>
-<script src="js/holographic-earth.js"></script>
 <script src="js/terminal.js"></script>
 <script src="js/scroll-animations.js"></script>
 <script src="js/contact.js"></script>
